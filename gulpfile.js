@@ -6,7 +6,7 @@ const uglify = require('gulp-uglify');
 const del = require('del');
 var browserSync = require('browser-sync').create();
 const sass = require('gulp-sass');
-
+const imagemin = require('gulp-imagemin');
 // const cssFiles = [
 //     './src/css/main.css',
 //     './src/css/test.css'
@@ -23,6 +23,13 @@ const jsFiles = [
 
 function clean() {
     return del(['build/*'])
+}
+
+function imgSquash() {
+    return gulp
+        .src('./src/img/*')
+        .pipe(imagemin())
+        .pipe(gulp.dest("./build/img"));
 }
 
 function styles() {
@@ -61,15 +68,16 @@ function watch() {
     gulp.watch('./src/scss/**/*.scss', styles);
     gulp.watch('./src/js/**/*.js', scripts);
     gulp.watch("./*.html").on('change', browserSync.reload);
+    gulp.watch("./src/img/*", imgSquash)
 
 }
 
-
+gulp.task('imgSquash', imgSquash);
 gulp.task('styles', styles);
 gulp.task('scripts', scripts);
 //Очистка файлов
 gulp.task('del', clean);
 //Отслеживать изминения
 gulp.task('watch', watch);
-gulp.task('build', gulp.series(clean, gulp.parallel(styles, scripts)));
+gulp.task('build', gulp.series(clean, gulp.parallel(styles, scripts, imgSquash)));
 gulp.task('dev', gulp.series('build', 'watch'));
