@@ -29,7 +29,17 @@ function imgSquash() {
     return gulp
         .src('./src/img/*')
         .pipe(imagemin())
-        .pipe(gulp.dest("./build/img"));
+        .pipe(imagemin([
+            imagemin.gifsicle({ interlaced: true }),
+            imagemin.jpegtran({ progressive: true }),
+            imagemin.optipng({ optimizationLevel: 5 }),
+            imagemin.svgo({
+                plugins: [
+                    { removeViewBox: true },
+                    { cleanupIDs: false }
+                ]
+            })
+        ])).pipe(gulp.dest("./build/img"));
 }
 
 function styles() {
