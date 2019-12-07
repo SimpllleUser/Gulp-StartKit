@@ -4,11 +4,18 @@ const autoprefixer = require('gulp-autoprefixer');
 const cleanCSS = require('gulp-clean-css');
 const uglify = require('gulp-uglify');
 const del = require('del');
+const sass = require('gulp-sass');
+const sourcemaps = require('gulp-sourcemaps');
 var browserSync = require('browser-sync').create();
 
+// const cssFiles = [
+//     './src/css/main.css',
+//     './src/css/test.css'
+// ];
+
 const cssFiles = [
-    './src/css/main.css',
-    './src/css/test.css'
+    './src/scss/main.scss',
+    './src/scss/test.scss'
 ];
 
 const jsFiles = [
@@ -24,6 +31,8 @@ function styles() {
     console.log("styles")
     return gulp.src(cssFiles)
         // Кокатанация файлов css
+        .pipe(sourcemaps.init())
+        .pipe(sass())
         .pipe(concat('style.css'))
         // Авто префиксер
         .pipe(autoprefixer({
@@ -31,6 +40,7 @@ function styles() {
         }))
         // Минификация сss
         .pipe(cleanCSS({ level: 2 }))
+        .pipe(sourcemaps.write('./'))
         .pipe(gulp.dest('./build/css'))
         .pipe(browserSync.stream());
 }
@@ -51,7 +61,9 @@ function watch() {
         }
     });
     //Отслеживать файлы по этому пути 
-    gulp.watch('./src/css/**/*css', styles);
+    // gulp.watch('./src/css/**/*css', styles);
+    gulp.watch('./src/scss/**/*csss', styles);
+
     gulp.watch('./src/js/**/*js', scripts);
     gulp.watch("./*.html").on('change', browserSync.reload);
 
