@@ -15,17 +15,14 @@ const imagemin = require('gulp-imagemin');
 const cssFiles = [
     './src/scss/main.scss',
     './src/scss/test.scss'
-]
+];
 const jsFiles = [
     './src/js/lib.js',
     './src/js/main.js'
-]
+];
 
-function clean() {
-    return del(['build/*'])
-}
 
-function imgSquash() {
+gulp.task('imgSquash', () => {
     return gulp
         .src('./src/img/*')
         .pipe(imagemin())
@@ -40,9 +37,8 @@ function imgSquash() {
                 ]
             })
         ])).pipe(gulp.dest("./build/img"));
-}
-
-function styles() {
+});
+gulp.task('styles', () => {
     console.log("styles")
     return gulp.src(cssFiles)
         .pipe(sass())
@@ -56,18 +52,23 @@ function styles() {
         .pipe(cleanCSS({ level: 2 }))
         .pipe(gulp.dest('./build/css'))
         .pipe(browserSync.stream());
-}
-
-function scripts() {
+});
+gulp.task('scripts', () => {
     console.log("scripts")
     return gulp.src(jsFiles)
         .pipe(concat('script.js'))
         .pipe(uglify({ toplevel: true }))
         .pipe(gulp.dest('./build/js'))
         .pipe(browserSync.stream());
-}
+});
 
-function watch() {
+
+gulp.task('clean', () => {
+    return del(['build/*'])
+});
+
+
+gulp.task('watch', () => {
     browserSync.init({
         server: {
             baseDir: "./"
@@ -75,19 +76,11 @@ function watch() {
     });
     //Отслеживать файлы по этому пути 
     // gulp.watch('./src/css/**/*css', styles);
-    gulp.watch('./src/scss/**/*.scss', styles);
-    gulp.watch('./src/js/**/*.js', scripts);
+    gulp.watch("./src/img/*", gulp.series('imgSquash'))
+    gulp.watch('./src/scss/**/*.scss', gulp.series('styles'));
+    gulp.watch('./src/js/**/*.js', gulp.series('scripts'));
     gulp.watch("./*.html").on('change', browserSync.reload);
-    gulp.watch("./src/img/*", imgSquash)
 
-}
-
-gulp.task('imgSquash', imgSquash);
-gulp.task('styles', styles);
-gulp.task('scripts', scripts);
-//Очистка файлов
-gulp.task('del', clean);
-//Отслеживать изминения
-gulp.task('watch', watch);
-gulp.task('build', gulp.series(clean, gulp.parallel(styles, scripts, imgSquash)));
+});
+gulp.task('build', gulp.series('clean', gulp.parallel('styles', 'scripts', 'imgSquash')));
 gulp.task('dev', gulp.series('build', 'watch'));
